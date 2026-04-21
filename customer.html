@@ -1,0 +1,1483 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AutoServ Pro — My Account</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0b0d; --surface: #111318; --surface2: #181b22;
+    --border: #1e2330; --accent: #e8692a; --accent2: #f0a855;
+    --text: #e8eaf0; --muted: #5a6278;
+    --success: #2ec47a; --warning: #f0a855; --danger: #e84a4a; --info: #4a8ee8;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+  .screen { display: none; min-height: 100vh; }
+  .screen.active { display: block; }
+
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 7px;
+    padding: 10px 20px; border-radius: 8px; border: none; cursor: pointer;
+    font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 600;
+    transition: all .2s; text-decoration: none;
+  }
+  .btn-primary { background: var(--accent); color: #fff; }
+  .btn-primary:hover { background: #d45e22; transform: translateY(-1px); box-shadow: 0 4px 16px rgba(232,105,42,.3); }
+  .btn-ghost { background: transparent; color: var(--muted); border: 1px solid var(--border); }
+  .btn-ghost:hover { color: var(--text); border-color: var(--muted); }
+  .btn-sm { padding: 6px 14px; font-size: 12px; }
+  .btn-lg { padding: 13px 28px; font-size: 15px; }
+  .btn-full { width: 100%; }
+  .btn-success { background: rgba(46,196,122,.12); color: var(--success); border: 1px solid rgba(46,196,122,.2); }
+  .btn-success:hover { background: rgba(46,196,122,.22); }
+  .btn-danger { background: rgba(232,74,74,.1); color: var(--danger); border: 1px solid rgba(232,74,74,.2); }
+  .btn:disabled { opacity: .5; cursor: not-allowed; transform: none !important; }
+
+  .form-group { display: flex; flex-direction: column; gap: 6px; }
+  .form-group.full { grid-column: 1 / -1; }
+  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  label { font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .5px; }
+  input, select, textarea {
+    background: var(--surface2); border: 1px solid var(--border); border-radius: 8px;
+    padding: 11px 14px; color: var(--text); font-family: 'DM Sans', sans-serif;
+    font-size: 14px; width: 100%; outline: none; transition: border-color .2s;
+  }
+  input:focus, select:focus, textarea:focus { border-color: var(--accent); }
+  select option { background: var(--surface2); }
+  textarea { resize: vertical; }
+  input::placeholder, textarea::placeholder { color: var(--muted); }
+
+  .tag { display: inline-block; padding: 2px 9px; border-radius: 4px; font-size: 11px; font-weight: 600; font-family: 'JetBrains Mono', monospace; background: rgba(232,105,42,.12); color: var(--accent); }
+  .pill { display: inline-flex; align-items: center; gap: 5px; padding: 4px 11px; border-radius: 20px; font-size: 11.5px; font-weight: 600; font-family: 'JetBrains Mono', monospace; }
+  .pill::before { content: '●'; font-size: 7px; }
+  .pill-completed { background: rgba(46,196,122,.12); color: var(--success); }
+  .pill-inprogress { background: rgba(240,168,85,.12); color: var(--warning); }
+  .pill-pending { background: rgba(74,142,232,.12); color: var(--info); }
+
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; }
+  .spinner { display: flex; justify-content: center; align-items: center; padding: 32px; }
+  .spinner::after { content: ''; width: 28px; height: 28px; border: 3px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin .7s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .empty { text-align: center; padding: 40px 20px; }
+  .empty-icon { font-size: 42px; margin-bottom: 10px; }
+  .empty p { color: var(--muted); font-size: 13.5px; }
+  .empty small { color: var(--muted); font-size: 12px; display: block; margin-top: 4px; }
+
+  /* ── MODAL ── */
+  .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.7); backdrop-filter: blur(5px); z-index: 300; align-items: center; justify-content: center; padding: 20px; }
+  .modal-overlay.open { display: flex; }
+  .modal { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 28px; width: 100%; max-width: 520px; max-height: 90vh; overflow-y: auto; animation: modalIn .25s ease; }
+  @keyframes modalIn { from { opacity: 0; transform: translateY(18px) scale(.97); } to { opacity: 1; transform: none; } }
+  .modal-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+  .modal-title { font-family: 'Bebas Neue', cursive; font-size: 22px; letter-spacing: 1.5px; }
+  .modal-close { background: none; border: none; color: var(--muted); font-size: 24px; cursor: pointer; line-height: 1; }
+  .modal-close:hover { color: var(--text); }
+  .modal-footer { display: flex; gap: 10px; justify-content: flex-end; margin-top: 22px; }
+
+  /* ── TOASTS ── */
+  #toastArea { position: fixed; bottom: 24px; right: 24px; z-index: 999; display: flex; flex-direction: column; gap: 10px; }
+  .toast { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 13px 18px; font-size: 13.5px; font-weight: 500; max-width: 320px; animation: toastIn .3s ease; display: flex; align-items: center; gap: 10px; }
+  .toast.success { border-color: rgba(46,196,122,.3); }
+  .toast.error   { border-color: rgba(232,74,74,.3); }
+  @keyframes toastIn { from { opacity: 0; transform: translateX(20px); } to { opacity: 1; transform: none; } }
+
+  /* ── LOGIN ── */
+  #screen-login {
+    display: flex; align-items: center; justify-content: center; min-height: 100vh;
+    background: radial-gradient(ellipse at 15% 60%, rgba(232,105,42,.08) 0%, transparent 55%),
+      radial-gradient(ellipse at 85% 20%, rgba(74,142,232,.05) 0%, transparent 55%), var(--bg);
+    padding: 20px;
+  }
+  .login-card { background: var(--surface); border: 1px solid var(--border); border-radius: 20px; padding: 40px 36px; width: 100%; max-width: 420px; display: flex; flex-direction: column; gap: 16px; box-shadow: 0 24px 64px rgba(0,0,0,.4); }
+  .login-logo { display: flex; align-items: center; gap: 14px; justify-content: center; margin-bottom: 4px; }
+  .logo-icon-lg { width: 50px; height: 50px; border-radius: 14px; background: linear-gradient(135deg, var(--accent), var(--accent2)); display: flex; align-items: center; justify-content: center; font-size: 26px; flex-shrink: 0; }
+  .logo-text-lg { font-family: 'Bebas Neue', cursive; font-size: 30px; letter-spacing: 2px; line-height: 1; }
+  .logo-text-lg span { color: var(--accent); }
+  .login-subtitle { text-align: center; color: var(--muted); font-size: 13px; }
+  .divider { display: flex; align-items: center; gap: 10px; color: var(--muted); font-size: 12px; }
+  .divider::before, .divider::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+  .login-error { display: none; color: var(--danger); font-size: 13px; text-align: center; background: rgba(232,74,74,.08); border: 1px solid rgba(232,74,74,.2); border-radius: 8px; padding: 10px 14px; }
+
+  /* ── WIZARD ── */
+  #screen-wizard { min-height: 100vh; background: radial-gradient(ellipse at 20% 30%, rgba(232,105,42,.06) 0%, transparent 50%), var(--bg); }
+  .wiz-topbar { display: flex; align-items: center; justify-content: space-between; padding: 16px 24px; border-bottom: 1px solid var(--border); background: var(--surface); }
+  .wiz-logo { font-family: 'Bebas Neue', cursive; font-size: 18px; letter-spacing: 2px; }
+  .wiz-logo span { color: var(--accent); }
+  .wiz-container { max-width: 580px; margin: 0 auto; padding: 32px 20px 40px; }
+  .wiz-progress { display: flex; align-items: center; justify-content: center; margin-bottom: 32px; }
+  .wiz-step-dot { display: flex; flex-direction: column; align-items: center; gap: 7px; }
+  .wiz-step-dot .dot { width: 38px; height: 38px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 14px; border: 2px solid var(--border); color: var(--muted); background: var(--surface2); transition: all .35s; }
+  .wiz-step-dot .dot-lbl { font-size: 10px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .6px; white-space: nowrap; }
+  .wiz-step-dot.active .dot { border-color: var(--accent); color: var(--accent); background: rgba(232,105,42,.1); }
+  .wiz-step-dot.done .dot { border-color: var(--success); background: var(--success); color: #fff; }
+  .wiz-step-dot.active .dot-lbl, .wiz-step-dot.done .dot-lbl { color: var(--text); }
+  .wiz-connector { flex: 1; height: 2px; background: var(--border); max-width: 72px; margin: 0 8px 24px; transition: background .4s; }
+  .wiz-connector.done { background: var(--success); }
+  .wiz-panel { display: none; background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 32px; }
+  .wiz-panel.active { display: block; animation: fadeUp .3s ease; }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
+  .wiz-panel h2 { font-family: 'Bebas Neue', cursive; font-size: 28px; letter-spacing: 1.5px; margin-bottom: 4px; }
+  .wiz-panel .wiz-desc { color: var(--muted); font-size: 13px; margin-bottom: 24px; }
+  .wiz-footer { display: flex; justify-content: flex-end; gap: 10px; margin-top: 26px; border-top: 1px solid var(--border); padding-top: 20px; }
+  .wiz-done-icon { font-size: 56px; text-align: center; margin-bottom: 18px; }
+  .wiz-done-msg { text-align: center; color: var(--muted); font-size: 14px; margin-bottom: 26px; line-height: 1.6; }
+  .wiz-done-msg strong { color: var(--text); display: block; font-size: 18px; margin-bottom: 6px; }
+
+  .mech-assign-box { display: none; background: var(--surface2); border: 1px solid rgba(232,105,42,.25); border-radius: 10px; padding: 14px 16px; margin-top: 16px; align-items: center; gap: 14px; }
+  .mech-assign-box.visible { display: flex; animation: fadeUp .25s ease; }
+  .mech-assign-avatar { width: 44px; height: 44px; border-radius: 10px; background: rgba(232,105,42,.12); display: flex; align-items: center; justify-content: center; font-size: 22px; flex-shrink: 0; }
+  .mech-assign-name { font-weight: 700; font-size: 14px; }
+  .mech-assign-spec { font-size: 12px; color: var(--accent); margin-top: 2px; }
+  .mech-assign-badge { font-size: 11px; color: var(--muted); margin-top: 3px; }
+
+  /* ── DASHBOARD ── */
+  .dash-topbar { height: 62px; background: var(--surface); border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; padding: 0 24px; position: sticky; top: 0; z-index: 100; }
+  .dash-logo { font-family: 'Bebas Neue', cursive; font-size: 20px; letter-spacing: 2px; }
+  .dash-logo span { color: var(--accent); }
+  .dash-user { font-size: 13.5px; color: var(--muted); }
+  .dash-user strong { color: var(--text); }
+  .dash-tabs { background: var(--surface); border-bottom: 1px solid var(--border); display: flex; padding: 0 20px; gap: 2px; position: sticky; top: 62px; z-index: 90; overflow-x: auto; }
+  .dash-tabs::-webkit-scrollbar { display: none; }
+  .tab-btn { padding: 15px 18px; border: none; background: none; color: var(--muted); font-family: 'DM Sans', sans-serif; font-size: 13.5px; font-weight: 600; cursor: pointer; border-bottom: 2px solid transparent; transition: all .2s; white-space: nowrap; flex-shrink: 0; }
+  .tab-btn:hover { color: var(--text); }
+  .tab-btn.active { color: var(--text); border-bottom-color: var(--accent); }
+  .dash-content { padding: 24px; max-width: 1080px; margin: 0 auto; }
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; animation: fadeUp .25s ease; }
+
+  .hero-banner { background: linear-gradient(135deg, rgba(232,105,42,.12), rgba(240,168,85,.05)); border: 1px solid rgba(232,105,42,.18); border-radius: 16px; padding: 24px 28px; margin-bottom: 20px; display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+  .hero-banner h2 { font-family: 'Bebas Neue', cursive; font-size: 26px; letter-spacing: 1.5px; margin-bottom: 4px; }
+  .hero-banner p { color: var(--muted); font-size: 13px; }
+  .hero-emoji { font-size: 52px; flex-shrink: 0; }
+
+  .stats-strip { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-bottom: 20px; }
+  .stat-mini { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 16px 18px; }
+  .stat-mini .s-val { font-family: 'Bebas Neue', cursive; font-size: 36px; line-height: 1; }
+  .stat-mini .s-lbl { font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .5px; margin-top: 4px; }
+  .stat-mini .s-icon { font-size: 20px; margin-bottom: 8px; }
+
+  .section-title { font-family: 'Bebas Neue', cursive; font-size: 18px; letter-spacing: 1px; color: var(--muted); margin-bottom: 14px; }
+  .section-title span { color: var(--text); }
+
+  .quick-row { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 24px; }
+  .quick-btn { display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 16px 22px; background: var(--surface); border: 1px solid var(--border); border-radius: 12px; cursor: pointer; font-family: 'DM Sans', sans-serif; color: var(--muted); font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: .4px; transition: all .2s; }
+  .quick-btn:hover { border-color: var(--accent); color: var(--accent); transform: translateY(-2px); }
+  .quick-btn-icon { font-size: 24px; }
+
+  .activity-list { display: flex; flex-direction: column; gap: 10px; }
+  .activity-row { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; display: flex; align-items: center; gap: 14px; }
+  .activity-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+  .activity-body { flex: 1; }
+  .activity-car { font-weight: 600; font-size: 13.5px; }
+  .activity-prob { font-size: 12.5px; color: var(--muted); margin-top: 2px; }
+  .activity-date { font-size: 11px; color: var(--muted); font-family: 'JetBrains Mono', monospace; }
+
+  /* Cars grid */
+  .cars-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px; }
+  .car-card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 22px; display: flex; flex-direction: column; transition: border-color .2s, transform .2s; }
+  .car-card:hover { border-color: rgba(232,105,42,.4); transform: translateY(-2px); }
+  .car-card-top { display: flex; align-items: flex-start; gap: 14px; margin-bottom: 14px; }
+  .car-card-icon { width: 48px; height: 48px; border-radius: 12px; background: var(--surface2); display: flex; align-items: center; justify-content: center; font-size: 26px; flex-shrink: 0; }
+  .car-card-reg { font-family: 'JetBrains Mono', monospace; font-weight: 700; font-size: 13px; color: var(--accent); margin-bottom: 3px; }
+  .car-card-name { font-weight: 700; font-size: 15px; }
+  .car-card-year { font-size: 12px; color: var(--muted); }
+  .car-card-footer { margin-top: auto; padding-top: 14px; border-top: 1px solid var(--border); display: flex; gap: 8px; }
+
+  /* ── FREE SERVICE BADGE ── */
+  .free-badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: rgba(46,196,122,.1); border: 1px solid rgba(46,196,122,.25);
+    color: var(--success); border-radius: 20px; padding: 4px 12px;
+    font-size: 11.5px; font-weight: 700; font-family: 'JetBrains Mono', monospace;
+  }
+  .free-badge.used {
+    background: rgba(232,74,74,.08); border-color: rgba(232,74,74,.2); color: var(--danger);
+  }
+  .free-badge.partial {
+    background: rgba(240,168,85,.1); border-color: rgba(240,168,85,.25); color: var(--warning);
+  }
+
+  /* Services tab */
+  .filter-row { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
+  .filter-btn { padding: 6px 16px; border: 1px solid var(--border); border-radius: 20px; background: none; color: var(--muted); font-family: 'DM Sans', sans-serif; font-size: 12.5px; font-weight: 600; cursor: pointer; transition: all .2s; }
+  .filter-btn.active { border-color: var(--accent); color: var(--text); background: rgba(232,105,42,.08); }
+
+  .service-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 18px 20px; margin-bottom: 12px; }
+  .service-card-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; margin-bottom: 12px; }
+  .service-card-left { flex: 1; }
+  .service-id-row { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+  .service-car-name { font-weight: 700; font-size: 14px; }
+  .service-car-reg { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--muted); }
+  .service-problem { font-size: 13.5px; color: var(--text); line-height: 1.5; margin-bottom: 12px; }
+  .service-meta { display: flex; align-items: center; gap: 16px; font-size: 12px; color: var(--muted); flex-wrap: wrap; margin-bottom: 14px; }
+  .service-meta-item { display: flex; align-items: center; gap: 5px; }
+  .service-meta-item strong { color: var(--text); }
+
+  .progress-track { display: flex; align-items: center; gap: 0; }
+  .prog-step { display: flex; align-items: center; }
+  .prog-step-inner { display: flex; flex-direction: column; align-items: center; gap: 5px; }
+  .prog-dot { width: 12px; height: 12px; border-radius: 50%; border: 2px solid var(--border); background: transparent; transition: all .3s; flex-shrink: 0; }
+  .prog-dot.done { background: var(--success); border-color: var(--success); }
+  .prog-dot.current { background: var(--accent); border-color: var(--accent); box-shadow: 0 0 0 4px rgba(232,105,42,.18); }
+  .prog-lbl { font-size: 10px; font-weight: 600; color: var(--muted); white-space: nowrap; }
+  .prog-lbl.active { color: var(--text); }
+  .prog-line { height: 2px; width: 52px; background: var(--border); margin: 0 2px; margin-bottom: 16px; transition: background .3s; }
+  .prog-line.done { background: var(--success); }
+
+  /* Payments tab */
+  .pay-section-hdr { font-family: 'Bebas Neue', cursive; font-size: 17px; letter-spacing: 1px; color: var(--muted); margin-bottom: 12px; display: flex; align-items: center; gap: 10px; }
+  .pay-section-hdr span { color: var(--text); }
+  .pay-count { background: var(--accent); color: #fff; border-radius: 20px; padding: 1px 8px; font-family: 'JetBrains Mono', monospace; font-size: 12px; }
+
+  .pay-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 18px 20px; margin-bottom: 12px; display: flex; align-items: center; gap: 16px; }
+  .pay-card-info { flex: 1; min-width: 0; }
+  .pay-card-car { font-weight: 700; font-size: 14px; }
+  .pay-card-reg { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--muted); }
+  .pay-card-prob { font-size: 12.5px; color: var(--muted); margin-top: 4px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .pay-card-right { display: flex; flex-direction: column; align-items: flex-end; gap: 8px; flex-shrink: 0; }
+  .pay-card-amount { font-family: 'Bebas Neue', cursive; font-size: 28px; color: var(--success); }
+  .pay-card-date { font-size: 11px; color: var(--muted); font-family: 'JetBrains Mono', monospace; }
+  .pay-mode-badge { font-size: 11.5px; color: var(--muted); background: var(--surface2); border: 1px solid var(--border); border-radius: 6px; padding: 2px 8px; font-weight: 600; }
+
+  /* ── SERVICE TYPE CARDS ── */
+  .svc-type-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 14px; }
+  .svc-type-card {
+    border: 2px solid var(--border); border-radius: 12px; padding: 14px 12px;
+    cursor: pointer; transition: all .2s; text-align: center; background: var(--surface2);
+  }
+  .svc-type-card:hover { border-color: rgba(232,105,42,.4); transform: translateY(-2px); }
+  .svc-type-card.selected { border-color: var(--accent); background: rgba(232,105,42,.08); }
+  .svc-type-icon { font-size: 26px; margin-bottom: 6px; }
+  .svc-type-name { font-weight: 700; font-size: 12.5px; margin-bottom: 3px; }
+  .svc-type-desc { font-size: 10.5px; color: var(--muted); margin-bottom: 5px; }
+  .svc-type-price { font-size: 10px; color: var(--accent); font-family: 'JetBrains Mono', monospace; font-weight: 600; }
+
+  /* ── SERVICE DETAIL BOX ── */
+  .svc-detail-box {
+    background: var(--surface2); border: 1px solid rgba(46,196,122,.2);
+    border-radius: 10px; padding: 14px 16px; margin-bottom: 16px;
+    animation: fadeUp .2s ease;
+  }
+  .svc-detail-title { font-weight: 700; font-size: 13px; color: var(--success); margin-bottom: 10px; }
+  .svc-checklist { list-style: none; display: flex; flex-direction: column; gap: 6px; padding: 0; }
+  .svc-checklist li { font-size: 12.5px; color: var(--text); display: flex; align-items: center; gap: 8px; }
+  .svc-checklist li::before { content: '✓'; color: var(--success); font-weight: 700; font-size: 12px; flex-shrink: 0; }
+
+  /* ── COMMON ISSUES CHECKBOXES ── */
+  .issues-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 7px; margin-bottom: 12px; }
+  .issue-chip {
+    display: flex; align-items: center; gap: 8px; padding: 9px 12px;
+    border: 1px solid var(--border); border-radius: 8px; cursor: pointer;
+    font-size: 12.5px; background: var(--surface2); transition: all .15s;
+    user-select: none;
+  }
+  .issue-chip:hover { border-color: rgba(232,105,42,.35); }
+  .issue-chip.selected { border-color: var(--accent); background: rgba(232,105,42,.1); color: var(--text); }
+  .issue-chip input[type="checkbox"] { display: none; }
+  .issue-chip-check {
+    width: 16px; height: 16px; border-radius: 4px; border: 1.5px solid var(--border);
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 10px;
+    transition: all .15s;
+  }
+  .issue-chip.selected .issue-chip-check { background: var(--accent); border-color: var(--accent); color: #fff; }
+
+  /* ── BILL BREAKDOWN in Pay Modal ── */
+  .bill-breakdown { background: var(--surface2); border-radius: 10px; padding: 16px; margin: 14px 0; }
+  .bill-breakdown-title { font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .5px; margin-bottom: 12px; }
+  .bill-line { display: flex; justify-content: space-between; align-items: center; font-size: 13px; padding: 5px 0; }
+  .bill-line .bl-name { color: var(--text); }
+  .bill-line .bl-amount { font-family: 'JetBrains Mono', monospace; font-weight: 600; color: var(--text); }
+  .bill-divider { height: 1px; background: var(--border); margin: 10px 0; }
+  .bill-total-row { display: flex; justify-content: space-between; align-items: center; padding-top: 6px; }
+  .bill-total-label { font-weight: 700; font-size: 15px; }
+  .bill-total-amount { font-family: 'Bebas Neue', cursive; font-size: 36px; color: var(--success); }
+  .bill-free-banner {
+    background: rgba(46,196,122,.1); border: 1px solid rgba(46,196,122,.25);
+    border-radius: 10px; padding: 14px 16px; margin: 14px 0;
+    display: flex; align-items: center; gap: 12px;
+  }
+  .bill-free-icon { font-size: 28px; }
+  .bill-free-title { font-weight: 700; font-size: 14px; color: var(--success); }
+  .bill-free-sub { font-size: 12px; color: var(--muted); margin-top: 2px; }
+
+  /* Receipt */
+  .receipt-header { text-align: center; margin-bottom: 22px; padding-bottom: 18px; border-bottom: 1px solid var(--border); }
+  .receipt-logo { font-family: 'Bebas Neue', cursive; font-size: 26px; letter-spacing: 2px; }
+  .receipt-logo span { color: var(--accent); }
+  .receipt-sub { font-size: 12px; color: var(--muted); margin-top: 3px; }
+  .receipt-meta { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; font-size: 13px; }
+  .receipt-meta-item .lbl { font-size: 10px; text-transform: uppercase; letter-spacing: .5px; color: var(--muted); font-weight: 600; margin-bottom: 4px; }
+  .receipt-vehicle { background: var(--surface2); border-radius: 8px; padding: 12px 14px; margin-bottom: 14px; font-size: 13px; display: flex; flex-direction: column; gap: 5px; }
+  .receipt-total { border-top: 2px solid var(--border); padding-top: 14px; display: flex; justify-content: space-between; align-items: center; margin-top: 12px; }
+  .receipt-total-label { font-weight: 700; font-size: 15px; }
+  .receipt-total-amount { font-family: 'Bebas Neue', cursive; font-size: 34px; color: var(--success); }
+
+  ::-webkit-scrollbar { width: 5px; height: 5px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+  @media (max-width: 600px) {
+    .form-grid { grid-template-columns: 1fr; }
+    .stats-strip { grid-template-columns: 1fr 1fr; }
+    .hero-emoji { display: none; }
+    .login-card { padding: 28px 20px; }
+    .pay-card { flex-direction: column; align-items: flex-start; }
+    .pay-card-right { align-items: flex-start; }
+    .wiz-panel { padding: 22px 18px; }
+    .svc-type-grid { grid-template-columns: repeat(3, 1fr); }
+    .issues-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div id="toastArea"></div>
+
+<!-- ════ SCREEN 1 — LOGIN ════ -->
+<div id="screen-login" class="screen active">
+  <div class="login-card">
+    <div class="login-logo">
+      <div class="logo-icon-lg">🔧</div>
+      <div class="logo-text-lg">AUTO<span>SERV</span></div>
+    </div>
+    <p class="login-subtitle">Track your car's service journey</p>
+    <div class="form-group">
+      <label>Full Name (as registered)</label>
+      <input id="l-name" placeholder="e.g. Rahul Sharma" autocomplete="name" />
+    </div>
+    <div class="form-group">
+      <label>Phone Number</label>
+      <input id="l-phone" type="tel" placeholder="10-digit mobile number" autocomplete="tel" />
+    </div>
+    <div id="login-error" class="login-error"></div>
+    <button class="btn btn-primary btn-full btn-lg" onclick="tryLogin()">Access My Account →</button>
+    <div class="divider">New to AutoServ?</div>
+    <button class="btn btn-ghost btn-full" onclick="startNewCustomer()">Register as New Customer</button>
+  </div>
+</div>
+
+<!-- ════ SCREEN 2 — WIZARD ════ -->
+<div id="screen-wizard" class="screen">
+  <div class="wiz-topbar">
+    <div class="wiz-logo">AUTO<span>SERV</span> PRO</div>
+    <button class="btn btn-ghost btn-sm" onclick="backToLogin()">← Back to Login</button>
+  </div>
+  <div class="wiz-container">
+    <div class="wiz-progress">
+      <div class="wiz-step-dot active" id="wdot-1"><div class="dot" id="wdot-num-1">1</div><div class="dot-lbl">Profile</div></div>
+      <div class="wiz-connector" id="wcon-1"></div>
+      <div class="wiz-step-dot" id="wdot-2"><div class="dot" id="wdot-num-2">2</div><div class="dot-lbl">Vehicle</div></div>
+      <div class="wiz-connector" id="wcon-2"></div>
+      <div class="wiz-step-dot" id="wdot-3"><div class="dot" id="wdot-num-3">3</div><div class="dot-lbl">Service</div></div>
+    </div>
+
+    <div class="wiz-panel active" id="wpanel-1">
+      <h2>Complete Your Profile</h2>
+      <p class="wiz-desc">Enter your details to create your AutoServ account.</p>
+      <div class="form-grid">
+        <div class="form-group"><label>Full Name *</label><input id="w1-name" placeholder="Rahul Sharma" /></div>
+        <div class="form-group"><label>Phone *</label><input id="w1-phone" type="tel" placeholder="10-digit number" /></div>
+        <div class="form-group"><label>Email</label><input id="w1-email" type="email" placeholder="Optional" /></div>
+        <div class="form-group"><label>City / Address</label><input id="w1-address" placeholder="Optional" /></div>
+      </div>
+      <div class="wiz-footer"><button class="btn btn-primary" onclick="wizStep1()">Continue →</button></div>
+    </div>
+
+    <div class="wiz-panel" id="wpanel-2">
+      <h2>Register Your Vehicle</h2>
+      <p class="wiz-desc">Add your car so we can track its service history.</p>
+      <div class="form-grid">
+        <div class="form-group"><label>Registration Number *</label><input id="w2-reg" placeholder="MH12AB1234" /></div>
+        <div class="form-group"><label>Brand *</label><input id="w2-brand" placeholder="Hyundai, Maruti…" /></div>
+        <div class="form-group"><label>Model *</label><input id="w2-model" placeholder="i20, Swift…" /></div>
+        <div class="form-group"><label>Manufacture Year *</label><input id="w2-year" type="number" placeholder="2022" min="1980" max="2026" /></div>
+      </div>
+      <div class="wiz-footer">
+        <button class="btn btn-ghost" onclick="wizSkip(2)">Skip for now</button>
+        <button class="btn btn-primary" onclick="wizStep2()">Continue →</button>
+      </div>
+    </div>
+
+    <div class="wiz-panel" id="wpanel-3">
+      <h2>Book a Service</h2>
+      <p class="wiz-desc">Choose a service package for your car. First 2 services per vehicle are <strong style="color:var(--success)">FREE</strong>.</p>
+
+      <div class="form-group" style="margin-bottom:14px">
+        <label>Select Vehicle</label>
+        <select id="w3-car" onchange="wizOnCarChange()">
+          <option value="">— Choose your car —</option>
+        </select>
+        <div id="w3-free-badge" style="margin-top:8px"></div>
+      </div>
+
+      <div style="margin-bottom:14px">
+        <label style="display:block;margin-bottom:10px">Choose Service Package</label>
+        <div class="svc-type-grid">
+          <div class="svc-type-card" id="wst-half" onclick="wizSelectType('Half Service')">
+            <div class="svc-type-icon">🔧</div>
+            <div class="svc-type-name">Half Service</div>
+            <div class="svc-type-desc">Oil & fluids</div>
+            <div class="svc-type-price">₹800 labor</div>
+          </div>
+          <div class="svc-type-card" id="wst-full" onclick="wizSelectType('Full Service')">
+            <div class="svc-type-icon">🔩</div>
+            <div class="svc-type-name">Full Service</div>
+            <div class="svc-type-desc">Complete check</div>
+            <div class="svc-type-price">₹1500 labor</div>
+          </div>
+          <div class="svc-type-card" id="wst-specific" onclick="wizSelectType('Specific')">
+            <div class="svc-type-icon">🎯</div>
+            <div class="svc-type-name">Specific Issue</div>
+            <div class="svc-type-desc">Tell us what's wrong</div>
+            <div class="svc-type-price">₹300+ labor</div>
+          </div>
+        </div>
+      </div>
+
+      <div id="wst-half-detail" style="display:none" class="svc-detail-box">
+        <div class="svc-detail-title">🔧 Half Service Includes:</div>
+        <ul class="svc-checklist">
+          <li>Engine oil change (fresh oil)</li>
+          <li>Brand-new oil filter replacement</li>
+          <li>Coolant top-up</li>
+          <li>Brake fluid top-up</li>
+          <li>Screen wash top-up</li>
+        </ul>
+      </div>
+      <div id="wst-full-detail" style="display:none" class="svc-detail-box">
+        <div class="svc-detail-title">🔩 Full Service Includes:</div>
+        <ul class="svc-checklist">
+          <li>All Half Service items</li>
+          <li>Brake system inspection & adjustment</li>
+          <li>Suspension & steering check</li>
+          <li>Exhaust system inspection</li>
+          <li>Lights & electrical systems check</li>
+          <li>Complete safety inspection</li>
+          <li>Detailed service report provided</li>
+        </ul>
+      </div>
+      <div id="wst-specific-detail" style="display:none">
+        <div style="margin-bottom:10px">
+          <label style="display:block;margin-bottom:8px">Common Issues (select all that apply)</label>
+          <div class="issues-grid" id="w3-issues-grid"></div>
+        </div>
+        <div class="form-group">
+          <label>Other / Describe in detail</label>
+          <textarea id="w3-problem" rows="3" placeholder="Describe any other issue…"></textarea>
+        </div>
+      </div>
+
+      <div class="mech-assign-box" id="w3-mech-box">
+        <div class="mech-assign-avatar">🔧</div>
+        <div>
+          <div class="mech-assign-name" id="w3-mech-name">—</div>
+          <div class="mech-assign-spec" id="w3-mech-spec">—</div>
+          <div class="mech-assign-badge" id="w3-mech-badge">Auto-assigned based on your service</div>
+        </div>
+      </div>
+
+      <div class="wiz-footer">
+        <button class="btn btn-ghost" onclick="wizSkip(3)">Skip for now</button>
+        <button class="btn btn-primary" onclick="wizStep3()" id="w3-submit-btn">Book Service →</button>
+      </div>
+    </div>
+
+    <div class="wiz-panel" id="wpanel-done">
+      <div class="wiz-done-icon">🎉</div>
+      <h2 style="text-align:center;letter-spacing:2px">You're All Set!</h2>
+      <p class="wiz-done-msg" id="wiz-done-msg">
+        <strong>Welcome to AutoServ Pro!</strong>
+        Your account has been created.
+      </p>
+      <button class="btn btn-primary btn-full btn-lg" onclick="goToDashboard()">Go to My Dashboard →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════ SCREEN 3 — DASHBOARD ════ -->
+<div id="screen-dashboard" class="screen">
+  <header class="dash-topbar">
+    <div class="dash-logo">AUTO<span>SERV</span> PRO</div>
+    <div class="dash-user">Hello, <strong id="dash-name">—</strong></div>
+    <button class="btn btn-ghost btn-sm" onclick="logout()">🚪 Logout</button>
+  </header>
+
+  <nav class="dash-tabs">
+    <button class="tab-btn active" onclick="switchTab('home', this)">🏠 Home</button>
+    <button class="tab-btn" onclick="switchTab('cars', this)">🚗 My Cars</button>
+    <button class="tab-btn" onclick="switchTab('services', this)">📋 Services</button>
+    <button class="tab-btn" onclick="switchTab('payments', this)">💳 Payments</button>
+  </nav>
+
+  <div class="dash-content">
+    <!-- HOME -->
+    <div class="tab-panel active" id="tab-home">
+      <div class="hero-banner">
+        <div>
+          <h2 id="home-greeting">WELCOME BACK</h2>
+          <p id="home-subline">Here's a summary of your vehicle services.</p>
+        </div>
+        <div class="hero-emoji">🚘</div>
+      </div>
+      <div class="stats-strip">
+        <div class="stat-mini"><div class="s-icon">🚗</div><div class="s-val" id="h-cars">—</div><div class="s-lbl">Cars Registered</div></div>
+        <div class="stat-mini"><div class="s-icon">📋</div><div class="s-val" id="h-active">—</div><div class="s-lbl">Active Services</div></div>
+        <div class="stat-mini"><div class="s-icon">💰</div><div class="s-val" id="h-spent">—</div><div class="s-lbl">Total Spent (₹)</div></div>
+      </div>
+      <div class="section-title" style="margin-bottom:12px">QUICK <span>ACTIONS</span></div>
+      <div class="quick-row" style="margin-bottom:24px">
+        <button class="quick-btn" onclick="openRegisterCarModal()"><div class="quick-btn-icon">🚗</div>Register New Car</button>
+        <button class="quick-btn" onclick="openBookServiceModal(null)"><div class="quick-btn-icon">🛠</div>Book a Service</button>
+        <button class="quick-btn" onclick="switchTab('payments', document.querySelector('.tab-btn:nth-child(4)'))"><div class="quick-btn-icon">💳</div>View Payments</button>
+      </div>
+      <div class="section-title"><span>RECENT</span> ACTIVITY</div>
+      <div id="home-activity"><div class="spinner"></div></div>
+    </div>
+
+    <!-- MY CARS -->
+    <div class="tab-panel" id="tab-cars">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:10px">
+        <div>
+          <div style="font-family:'Bebas Neue',cursive;font-size:28px;letter-spacing:2px">MY VEHICLES</div>
+          <div style="color:var(--muted);font-size:13px;margin-top:2px">Registered cars on your account</div>
+        </div>
+        <button class="btn btn-primary" onclick="openRegisterCarModal()">＋ Register Car</button>
+      </div>
+      <div class="cars-grid" id="cars-grid"><div class="spinner"></div></div>
+    </div>
+
+    <!-- SERVICES -->
+    <div class="tab-panel" id="tab-services">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px">
+        <div>
+          <div style="font-family:'Bebas Neue',cursive;font-size:28px;letter-spacing:2px">SERVICE HISTORY</div>
+          <div style="color:var(--muted);font-size:13px;margin-top:2px">All requests for your vehicles</div>
+        </div>
+        <button class="btn btn-primary" onclick="openBookServiceModal(null)">＋ Book Service</button>
+      </div>
+      <div class="filter-row">
+        <button class="filter-btn active" onclick="filterServices('all',this)">All</button>
+        <button class="filter-btn" onclick="filterServices('Pending',this)">🔵 Pending</button>
+        <button class="filter-btn" onclick="filterServices('In Progress',this)">🟡 In Progress</button>
+        <button class="filter-btn" onclick="filterServices('Completed',this)">🟢 Completed</button>
+      </div>
+      <div id="services-list"><div class="spinner"></div></div>
+    </div>
+
+    <!-- PAYMENTS -->
+    <div class="tab-panel" id="tab-payments">
+      <div style="font-family:'Bebas Neue',cursive;font-size:28px;letter-spacing:2px;margin-bottom:4px">PAYMENTS</div>
+      <div style="color:var(--muted);font-size:13px;margin-bottom:24px">Bills and payment history</div>
+      <div class="pay-section-hdr">READY TO <span>PAY</span> <span class="pay-count" id="pending-pay-count" style="display:none">0</span></div>
+      <div id="pay-ready-list"><div class="spinner"></div></div>
+      <div class="pay-section-hdr" style="margin-top:28px">PAYMENT <span>HISTORY</span></div>
+      <div id="pay-history-list"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ════ MODALS ════ -->
+
+<!-- Register Car -->
+<div class="modal-overlay" id="modal-addcar">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">REGISTER VEHICLE</div>
+      <button class="modal-close" onclick="closeModal('modal-addcar')">×</button>
+    </div>
+    <div class="form-grid">
+      <div class="form-group"><label>Registration Number *</label><input id="ac-reg" placeholder="MH12AB1234" /></div>
+      <div class="form-group"><label>Brand *</label><input id="ac-brand" placeholder="Hyundai" /></div>
+      <div class="form-group"><label>Model *</label><input id="ac-model" placeholder="i20" /></div>
+      <div class="form-group"><label>Year *</label><input id="ac-year" type="number" placeholder="2022" min="1980" max="2026" /></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('modal-addcar')">Cancel</button>
+      <button class="btn btn-primary" onclick="submitRegisterCar()">Register →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ★ Book Service — redesigned with packages + issue checkboxes + free badge -->
+<div class="modal-overlay" id="modal-bookservice">
+  <div class="modal" style="max-width:540px">
+    <div class="modal-header">
+      <div class="modal-title">BOOK A SERVICE</div>
+      <button class="modal-close" onclick="closeModal('modal-bookservice')">×</button>
+    </div>
+
+    <div class="form-group" style="margin-bottom:14px">
+      <label>Select Your Car *</label>
+      <select id="bs-car" onchange="onBsCarChange()"></select>
+      <div id="bs-free-badge" style="margin-top:8px"></div>
+    </div>
+
+    <div style="margin-bottom:14px">
+      <label style="display:block;margin-bottom:10px">Choose Service Package *</label>
+      <div class="svc-type-grid">
+        <div class="svc-type-card" id="bst-half" onclick="bsSelectType('Half Service')">
+          <div class="svc-type-icon">🔧</div>
+          <div class="svc-type-name">Half Service</div>
+          <div class="svc-type-desc">Oil & fluids top-up</div>
+          <div class="svc-type-price">₹800 labor</div>
+        </div>
+        <div class="svc-type-card" id="bst-full" onclick="bsSelectType('Full Service')">
+          <div class="svc-type-icon">🔩</div>
+          <div class="svc-type-name">Full Service</div>
+          <div class="svc-type-desc">Full inspection</div>
+          <div class="svc-type-price">₹1500 labor</div>
+        </div>
+        <div class="svc-type-card" id="bst-specific" onclick="bsSelectType('Specific')">
+          <div class="svc-type-icon">🎯</div>
+          <div class="svc-type-name">Specific Issue</div>
+          <div class="svc-type-desc">Describe problem</div>
+          <div class="svc-type-price">₹300+ labor</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Half Service details -->
+    <div id="bst-half-detail" style="display:none" class="svc-detail-box">
+      <div class="svc-detail-title">🔧 Half Service Includes:</div>
+      <ul class="svc-checklist">
+        <li>Engine oil change (fresh oil)</li>
+        <li>Brand-new oil filter replacement</li>
+        <li>Coolant top-up</li>
+        <li>Brake fluid top-up</li>
+        <li>Screen wash top-up</li>
+      </ul>
+    </div>
+
+    <!-- Full Service details -->
+    <div id="bst-full-detail" style="display:none" class="svc-detail-box">
+      <div class="svc-detail-title">🔩 Full Service Includes:</div>
+      <ul class="svc-checklist">
+        <li>All Half Service items</li>
+        <li>Brake system inspection & adjustment</li>
+        <li>Suspension & steering check</li>
+        <li>Exhaust system inspection</li>
+        <li>Lights & electrical systems check</li>
+        <li>Complete safety inspection</li>
+        <li>Detailed service report provided to customer</li>
+      </ul>
+    </div>
+
+    <!-- Specific Issue details -->
+    <div id="bst-specific-detail" style="display:none">
+      <div style="margin-bottom:10px">
+        <label style="display:block;margin-bottom:8px">Common Issues (select all that apply)</label>
+        <div class="issues-grid" id="bs-issues-grid"></div>
+      </div>
+      <div class="form-group">
+        <label>Other / Describe in detail</label>
+        <textarea id="bs-problem" rows="3" placeholder="Describe any other issue not listed above…"></textarea>
+      </div>
+    </div>
+
+    <!-- Auto-mechanic preview -->
+    <div class="mech-assign-box" id="bs-mech-box">
+      <div class="mech-assign-avatar">🔧</div>
+      <div>
+        <div class="mech-assign-name" id="bs-mech-name">—</div>
+        <div class="mech-assign-spec" id="bs-mech-spec">—</div>
+        <div class="mech-assign-badge" id="bs-mech-badge">Auto-assigned based on your service type</div>
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('modal-bookservice')">Cancel</button>
+      <button class="btn btn-primary" onclick="submitBookService()" id="bs-submit">Confirm Booking →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ★ Pay Bill — auto-calculated amount, no manual entry -->
+<div class="modal-overlay" id="modal-pay">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">SERVICE PAYMENT</div>
+      <button class="modal-close" onclick="closeModal('modal-pay')">×</button>
+    </div>
+
+    <div id="pay-modal-service-info" style="background:var(--surface2);border-radius:10px;padding:14px 16px;margin-bottom:14px;font-size:13px;"></div>
+
+    <!-- Auto-calculated breakdown — populated by JS -->
+    <div id="pay-calc-area"><div class="spinner"></div></div>
+
+    <!-- Payment mode (always shown) -->
+    <div id="pay-mode-row" class="form-group" style="margin-top:14px;display:none">
+      <label>Payment Mode *</label>
+      <select id="pay-mode">
+        <option>Cash</option>
+        <option>UPI</option>
+        <option>Card</option>
+      </select>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('modal-pay')">Cancel</button>
+      <button class="btn btn-success btn-lg" id="pay-confirm-btn" onclick="submitPayment()" disabled>Loading…</button>
+    </div>
+  </div>
+</div>
+
+<!-- View Receipt -->
+<div class="modal-overlay" id="modal-receipt">
+  <div class="modal" id="receipt-content"></div>
+</div>
+
+<script>
+// ══════════════════════════════════════════
+//  CONFIG & STATE
+// ══════════════════════════════════════════
+const API = 'http://localhost:3000/api';
+
+let CUSTOMER   = null;
+let DASH       = { cars:[], services:[], bills:[] };
+let WIZ        = { cid: null, carId: null, mechId: null, svcType: null };
+let _payTarget = null;   // { serviceId, carName, regNo, problem, calcData }
+let _mechDebounce = null;
+let _bsType    = null;   // selected service type in Book Service modal
+let _wizType   = null;   // selected service type in wizard
+
+// ── COMMON ISSUES for "Specific" mode ──
+const COMMON_ISSUES = [
+  { id: 'brake',       label: '🛑 Brake noise / issue',    keyword: 'brake' },
+  { id: 'engine',      label: '⚙️ Engine problem',          keyword: 'engine' },
+  { id: 'ac',          label: '❄️ AC not cooling',           keyword: 'ac' },
+  { id: 'battery',     label: '🔋 Battery / starting issue', keyword: 'battery' },
+  { id: 'gear',        label: '🔄 Gear / clutch issue',      keyword: 'clutch' },
+  { id: 'exhaust',     label: '💨 Exhaust / smoke problem',  keyword: 'exhaust' },
+  { id: 'electrical',  label: '⚡ Electrical fault',         keyword: 'electrical' },
+  { id: 'suspension',  label: '🏎️ Suspension / steering',   keyword: 'suspension' },
+  { id: 'lights',      label: '💡 Lights not working',       keyword: 'light' },
+  { id: 'oil',         label: '🛢️ Oil leak / consumption',   keyword: 'oil' },
+  { id: 'overheat',    label: '🌡️ Overheating',              keyword: 'overheat' },
+  { id: 'tyre',        label: '🔘 Tyre / wheel vibration',   keyword: 'tyre' },
+];
+
+// ══════════════════════════════════════════
+//  HTTP HELPERS
+// ══════════════════════════════════════════
+async function http(method, path, body) {
+  try {
+    const res = await fetch(API + path, {
+      method,
+      headers: { 'Content-Type': 'application/json' },
+      body: body ? JSON.stringify(body) : undefined
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(data.error || `HTTP ${res.status}`);
+    return data;
+  } catch (err) {
+    toast(err.message, 'error');
+    return null;
+  }
+}
+const GET  = p     => http('GET', p);
+const POST = (p,b) => http('POST', p, b);
+
+// ══════════════════════════════════════════
+//  TOAST
+// ══════════════════════════════════════════
+function toast(msg, type='success') {
+  const el = document.createElement('div');
+  el.className = `toast ${type}`;
+  el.innerHTML = `<span>${type==='success'?'✅':'❌'}</span> ${msg}`;
+  document.getElementById('toastArea').appendChild(el);
+  setTimeout(() => el.remove(), 3500);
+}
+
+// ══════════════════════════════════════════
+//  SCREEN / MODAL
+// ══════════════════════════════════════════
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => { s.classList.remove('active'); s.style.display='none'; });
+  const el = document.getElementById('screen-' + id);
+  el.style.display = 'block'; el.classList.add('active');
+}
+function openModal(id) { document.getElementById(id).classList.add('open'); }
+function closeModal(id){ document.getElementById(id).classList.remove('open'); }
+document.querySelectorAll('.modal-overlay').forEach(m =>
+  m.addEventListener('click', e => { if (e.target === m) m.classList.remove('open'); })
+);
+
+// ══════════════════════════════════════════
+//  STATUS HELPERS
+// ══════════════════════════════════════════
+function statusPill(s) {
+  if (s === 'Completed')   return `<span class="pill pill-completed">Completed</span>`;
+  if (s === 'In Progress') return `<span class="pill pill-inprogress">In Progress</span>`;
+  return `<span class="pill pill-pending">Pending</span>`;
+}
+
+function progressBar(status) {
+  const steps  = ['Pending','In Progress','Completed'];
+  const cur    = steps.indexOf(status);
+  const icons  = ['🔵','🟡','🟢'];
+  let html = '<div class="progress-track">';
+  steps.forEach((s, i) => {
+    html += `<div class="prog-step"><div class="prog-step-inner">
+      <div class="prog-dot ${i<cur?'done':''} ${i===cur?'current':''}"></div>
+      <div class="prog-lbl ${(i===cur||i<cur)?'active':''}">${icons[i]} ${s}</div>
+    </div></div>`;
+    if (i < steps.length - 1) html += `<div class="prog-line ${i<cur?'done':''}"></div>`;
+  });
+  return html + '</div>';
+}
+
+function freeBadgeHtml(sc) {
+  const FREE_LIMIT = 2;
+  const remaining = Math.max(0, FREE_LIMIT - sc);
+  if (remaining >= 2) return `<span class="free-badge">🎁 ${remaining} free services available</span>`;
+  if (remaining === 1) return `<span class="free-badge partial">🎁 ${remaining} free service remaining</span>`;
+  return `<span class="free-badge used">✅ Free services used (pay per service)</span>`;
+}
+
+// ══════════════════════════════════════════
+//  LOGIN
+// ══════════════════════════════════════════
+async function tryLogin() {
+  const name  = document.getElementById('l-name').value.trim();
+  const phone = document.getElementById('l-phone').value.trim();
+  const errEl = document.getElementById('login-error');
+  errEl.style.display = 'none';
+  if (!name || !phone) { errEl.textContent='Please enter your name and phone number.'; errEl.style.display='block'; return; }
+
+  const res = await fetch(`${API}/customer/login`, {
+    method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({name,phone})
+  });
+  if (res.status === 404) {
+    errEl.innerHTML='Account not found. <strong>Check spelling</strong> or register as a new customer below.';
+    errEl.style.display='block'; return;
+  }
+  if (!res.ok) { errEl.textContent='Something went wrong.'; errEl.style.display='block'; return; }
+
+  CUSTOMER = await res.json();
+  toast(`Welcome back, ${CUSTOMER.C_name}! 👋`);
+  goToDashboard();
+}
+
+// ══════════════════════════════════════════
+//  WIZARD
+// ══════════════════════════════════════════
+function startNewCustomer() {
+  document.getElementById('w1-name').value  = document.getElementById('l-name').value;
+  document.getElementById('w1-phone').value = document.getElementById('l-phone').value;
+  _wizType = null;
+  WIZ = { cid:null, carId:null, mechId:null, svcType:null };
+  buildIssuesGrid('w3-issues-grid');
+  setWizStep(1);
+  showScreen('wizard');
+}
+function backToLogin() { showScreen('login'); }
+
+function setWizStep(step) {
+  [1,2,3,'done'].forEach(s => {
+    const p = document.getElementById(`wpanel-${s}`);
+    if (p) p.classList.toggle('active', s===step);
+  });
+  [1,2,3].forEach(i => {
+    const dot=document.getElementById(`wdot-${i}`);
+    const con=document.getElementById(`wcon-${i}`);
+    const num=document.getElementById(`wdot-num-${i}`);
+    if (!dot) return;
+    if (i<step)  { dot.className='wiz-step-dot done';   if(num)num.textContent='✓'; }
+    if (i===step){ dot.className='wiz-step-dot active';  if(num)num.textContent=i; }
+    if (i>step)  { dot.className='wiz-step-dot';         if(num)num.textContent=i; }
+    if (con) con.className=`wiz-connector ${i<step?'done':''}`;
+  });
+}
+
+async function wizStep1() {
+  const name=document.getElementById('w1-name').value.trim();
+  const phone=document.getElementById('w1-phone').value.trim();
+  const email=document.getElementById('w1-email').value.trim();
+  const address=document.getElementById('w1-address').value.trim();
+  if (!name||!phone){toast('Name and phone are required.','error');return;}
+  const res=await POST('/customers',{name,phone,email,address});
+  if(!res)return;
+  WIZ.cid=res.C_id;
+  CUSTOMER={C_id:res.C_id,C_name:name,Phone:phone,Email:email,Address:address};
+  setWizStep(2);
+}
+
+async function wizStep2() {
+  const reg=document.getElementById('w2-reg').value.trim().toUpperCase();
+  const brand=document.getElementById('w2-brand').value.trim();
+  const model=document.getElementById('w2-model').value.trim();
+  const year=document.getElementById('w2-year').value;
+  if(!reg||!brand||!model||!year){toast('All vehicle fields are required.','error');return;}
+  const res=await POST('/cars',{reg,brand,model,year,cid:WIZ.cid});
+  if(!res)return;
+  WIZ.carId=res.Car_id;
+  document.getElementById('w3-car').innerHTML=`<option value="${WIZ.carId}">${reg} — ${brand} ${model}</option>`;
+  // New car → 0 services → both free
+  document.getElementById('w3-free-badge').innerHTML=freeBadgeHtml(0);
+  setWizStep(3);
+}
+
+async function wizOnCarChange() {
+  const carId=document.getElementById('w3-car').value;
+  const el=document.getElementById('w3-free-badge');
+  if(!carId){el.innerHTML='';return;}
+  const data=await GET(`/cars/${carId}/service-eligibility`);
+  if(data) el.innerHTML=freeBadgeHtml(data.totalServices);
+}
+
+function wizSelectType(type) {
+  _wizType=type;
+  ['Half Service','Full Service','Specific'].forEach(t => {
+    const id=`wst-${t==='Half Service'?'half':t==='Full Service'?'full':'specific'}`;
+    document.getElementById(id).classList.toggle('selected', t===type);
+  });
+  document.getElementById('wst-half-detail').style.display    = type==='Half Service' ? 'block' : 'none';
+  document.getElementById('wst-full-detail').style.display    = type==='Full Service' ? 'block' : 'none';
+  document.getElementById('wst-specific-detail').style.display= type==='Specific'     ? 'block' : 'none';
+
+  // Auto-preview mechanic for half/full
+  if(type!=='Specific') previewMechanic('w3', type.toLowerCase());
+  else hideMechBox('w3');
+}
+
+async function wizSkip(step) {
+  if(step===2){setWizStep(3);document.getElementById('w3-car').innerHTML='<option value="">— No car registered yet —</option>';return;}
+  if(step===3){
+    setWizStep('done');
+    document.getElementById('wiz-done-msg').innerHTML=
+      `<strong>Welcome, ${CUSTOMER.C_name}!</strong> Your account is set up.`;
+  }
+}
+
+async function wizStep3() {
+  const carId=document.getElementById('w3-car').value;
+  if(!carId){toast('Please select a vehicle.','error');return;}
+  if(!_wizType){toast('Please select a service package.','error');return;}
+  const problem=buildProblemString('w3');
+  if(!problem){toast('Please describe the issue for Specific service.','error');return;}
+
+  const mech=await POST('/customer/auto-mechanic',{problem});
+  if(!mech)return;
+  WIZ.mechId=mech.M_id;
+  const date=new Date().toISOString().split('T')[0];
+  const svc=await POST('/services',{date,problem,status:'Pending',carId,mId:mech.M_id,serviceType:_wizType});
+  if(!svc)return;
+  toast(`Service booked! Assigned to ${mech.MName}`);
+  setWizStep('done');
+  document.getElementById('wiz-done-msg').innerHTML=
+    `<strong>All done, ${CUSTOMER.C_name}!</strong><br>
+     ${_wizType} booked and assigned to <strong style="color:var(--accent)">${mech.MName}</strong>
+     — ${mech.Specialization||'General'}.`;
+}
+
+function goToDashboard() {
+  showScreen('dashboard');
+  document.getElementById('dash-name').textContent=CUSTOMER.C_name;
+  loadDashboard();
+}
+
+// ══════════════════════════════════════════
+//  DASHBOARD
+// ══════════════════════════════════════════
+async function loadDashboard() {
+  const data=await GET(`/customer/${CUSTOMER.C_id}/dashboard`);
+  if(!data)return;
+  DASH=data;
+  document.getElementById('dash-name').textContent=CUSTOMER.C_name;
+  document.getElementById('home-greeting').textContent=`WELCOME, ${CUSTOMER.C_name.split(' ')[0].toUpperCase()}!`;
+  renderHome(); renderCars(); renderServices('all'); renderPayments();
+}
+
+function renderHome() {
+  const active=DASH.services.filter(s=>s.Service_status!=='Completed').length;
+  const spent=DASH.bills.reduce((s,b)=>s+Number(b.Total_Amount),0);
+  document.getElementById('h-cars').textContent   = DASH.cars.length;
+  document.getElementById('h-active').textContent = active;
+  document.getElementById('h-spent').textContent  = spent>0?'₹'+spent.toLocaleString('en-IN'):'₹0';
+
+  const recent=DASH.services.slice(0,4);
+  const cols=['var(--accent)','var(--success)','var(--info)','var(--warning)'];
+  document.getElementById('home-activity').innerHTML=recent.length
+    ?recent.map((sr,i)=>`
+      <div class="activity-row">
+        <div class="activity-dot" style="background:${cols[i%4]}"></div>
+        <div class="activity-body">
+          <div class="activity-car">${sr.Brand} ${sr.Model}
+            <span class="tag" style="font-size:10px">SR#${sr.Service_id}</span>
+            ${sr.Service_Type&&sr.Service_Type!=='Specific'?`<span class="tag" style="font-size:10px;background:rgba(46,196,122,.1);color:var(--success)">${sr.Service_Type}</span>`:''}
+          </div>
+          <div class="activity-prob">${sr.Problem||'—'}</div>
+        </div>
+        ${statusPill(sr.Service_status)}
+        <div class="activity-date">${sr.Service_date?.substring(0,10)||''}</div>
+      </div>`).join('')
+    :`<div class="empty"><div class="empty-icon">🛠</div><p>No service activity yet.</p></div>`;
+}
+
+function renderCars() {
+  const grid=document.getElementById('cars-grid');
+  if(!DASH.cars.length){
+    grid.innerHTML=`<div class="empty" style="grid-column:1/-1"><div class="empty-icon">🚗</div><p>No vehicles registered yet.</p></div>`;
+    return;
+  }
+  grid.innerHTML=DASH.cars.map(car=>{
+    const latestSvc=DASH.services.find(s=>s.Car_id===car.Car_id);
+    const statusHtml=latestSvc?statusPill(latestSvc.Service_status):`<span style="font-size:12px;color:var(--muted)">No service yet</span>`;
+    const sc=car.service_count||0;
+    return `<div class="car-card">
+      <div class="car-card-top">
+        <div class="car-card-icon">🚘</div>
+        <div>
+          <div class="car-card-reg">${car.Registration_number}</div>
+          <div class="car-card-name">${car.Brand} ${car.Model}</div>
+          <div class="car-card-year">${car.Manu_Year}</div>
+        </div>
+      </div>
+      <div style="margin-bottom:12px">${freeBadgeHtml(sc)}</div>
+      <div style="margin-bottom:14px">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:5px;font-weight:600;text-transform:uppercase;letter-spacing:.4px">Latest Status</div>
+        ${statusHtml}
+      </div>
+      <div class="car-card-footer">
+        <button class="btn btn-primary btn-sm" style="flex:1" onclick="openBookServiceModal(${car.Car_id})">🛠 Book Service</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function renderServices(filter) {
+  const data=filter==='all'?DASH.services:DASH.services.filter(s=>s.Service_status===filter);
+  document.getElementById('services-list').innerHTML=data.length
+    ?data.map(sr=>{
+        const hasBill=DASH.bills.some(b=>b.Service_id===sr.Service_id);
+        const canPay=sr.Service_status==='Completed'&&!hasBill;
+        const typeTag=sr.Service_Type&&sr.Service_Type!=='Specific'
+          ?`<span class="tag" style="background:rgba(46,196,122,.1);color:var(--success)">${sr.Service_Type}</span>`:'';
+        return `<div class="service-card">
+          <div class="service-card-top">
+            <div class="service-card-left">
+              <div class="service-id-row">
+                <span class="tag">SR#${sr.Service_id}</span>
+                ${typeTag}
+                <span style="font-size:11px;color:var(--muted);font-family:'JetBrains Mono',monospace">${sr.Service_date?.substring(0,10)||''}</span>
+              </div>
+              <div class="service-car-name">${sr.Brand} ${sr.Model}</div>
+              <div class="service-car-reg">${sr.Registration_number}</div>
+            </div>
+            <div style="flex-shrink:0">${statusPill(sr.Service_status)}</div>
+          </div>
+          <div class="service-problem">${sr.Problem||'—'}</div>
+          <div class="service-meta">
+            <div class="service-meta-item">🔧 Mechanic: <strong>${sr.MName||'<span style="color:var(--muted)">Unassigned</span>'}</strong></div>
+            ${sr.Specialization?`<div class="service-meta-item">⚙️ <strong style="color:var(--accent)">${sr.Specialization}</strong></div>`:''}
+          </div>
+          ${progressBar(sr.Service_status)}
+          ${canPay?`<div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--border)">
+            <button class="btn btn-success" onclick="openPayModal(${sr.Service_id},'${sr.Brand} ${sr.Model}','${sr.Registration_number}','${(sr.Problem||'').replace(/'/g,"\\'")}')">
+              💳 Pay Now — Amount auto-calculated
+            </button>
+          </div>`:''}
+        </div>`;
+      }).join('')
+    :`<div class="empty"><div class="empty-icon">📋</div><p>No service requests${filter!=='all'?' with this status':''}.</p></div>`;
+}
+
+function filterServices(filter,btn) {
+  document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderServices(filter);
+}
+
+function renderPayments() {
+  const billedIds=new Set(DASH.bills.map(b=>b.Service_id));
+  const readyToPay=DASH.services.filter(s=>s.Service_status==='Completed'&&!billedIds.has(s.Service_id));
+
+  const countEl=document.getElementById('pending-pay-count');
+  if(readyToPay.length>0){countEl.textContent=readyToPay.length;countEl.style.display='inline-block';}
+  else countEl.style.display='none';
+
+  document.getElementById('pay-ready-list').innerHTML=readyToPay.length
+    ?readyToPay.map(sr=>`
+      <div class="pay-card">
+        <div class="pay-card-info">
+          <div class="pay-card-car">${sr.Brand} ${sr.Model}</div>
+          <div class="pay-card-reg">${sr.Registration_number} · SR#${sr.Service_id}</div>
+          <div class="pay-card-prob">${sr.Problem}</div>
+        </div>
+        <div class="pay-card-right">
+          <button class="btn btn-success" onclick="openPayModal(${sr.Service_id},'${sr.Brand} ${sr.Model}','${sr.Registration_number}','${(sr.Problem||'').replace(/'/g,"\\'")}')">
+            💳 Pay Now
+          </button>
+        </div>
+      </div>`).join('')
+    :`<div class="empty"><div class="empty-icon">✅</div><p>No pending payments.</p></div>`;
+
+  document.getElementById('pay-history-list').innerHTML=DASH.bills.length
+    ?DASH.bills.map(b=>`
+      <div class="pay-card">
+        <div class="pay-card-info">
+          <div class="pay-card-car">${b.Brand} ${b.Model}</div>
+          <div class="pay-card-reg">${b.Registration_number} · SR#${b.Service_id}</div>
+          <div class="pay-card-prob">${b.Problem}</div>
+        </div>
+        <div class="pay-card-right">
+          <div class="pay-card-amount">${Number(b.Total_Amount)===0?'FREE':'₹'+Number(b.Total_Amount).toLocaleString('en-IN')}</div>
+          <div class="pay-card-date">${b.Bill_date?.substring(0,10)||''}</div>
+          <div class="pay-mode-badge">${b.Payment_Mode}</div>
+          <button class="btn btn-ghost btn-sm" onclick="openReceiptModal(${b.Bill_id})">🧾 Receipt</button>
+        </div>
+      </div>`).join('')
+    :`<div class="empty"><div class="empty-icon">🧾</div><p>No payment history yet.</p></div>`;
+}
+
+// ══════════════════════════════════════════
+//  TAB SWITCHING
+// ══════════════════════════════════════════
+function switchTab(tab,btn) {
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+  if(btn)btn.classList.add('active');
+  document.getElementById('tab-'+tab).classList.add('active');
+}
+
+// ══════════════════════════════════════════
+//  REGISTER CAR
+// ══════════════════════════════════════════
+function openRegisterCarModal() {
+  ['ac-reg','ac-brand','ac-model','ac-year'].forEach(id=>document.getElementById(id).value='');
+  openModal('modal-addcar');
+}
+async function submitRegisterCar() {
+  const reg=document.getElementById('ac-reg').value.trim().toUpperCase();
+  const brand=document.getElementById('ac-brand').value.trim();
+  const model=document.getElementById('ac-model').value.trim();
+  const year=document.getElementById('ac-year').value;
+  if(!reg||!brand||!model||!year){toast('All fields are required.','error');return;}
+  const res=await POST('/cars',{reg,brand,model,year,cid:CUSTOMER.C_id});
+  if(!res)return;
+  toast(`${brand} ${model} registered! 🚗`);
+  closeModal('modal-addcar');
+  loadDashboard();
+}
+
+// ══════════════════════════════════════════
+//  BOOK SERVICE — full redesign with packages
+// ══════════════════════════════════════════
+function buildIssuesGrid(gridId) {
+  document.getElementById(gridId).innerHTML=COMMON_ISSUES.map(iss=>`
+    <div class="issue-chip" id="chip-${gridId}-${iss.id}" onclick="toggleIssue('${gridId}','${iss.id}')">
+      <div class="issue-chip-check" id="chk-${gridId}-${iss.id}">✓</div>
+      ${iss.label}
+    </div>`).join('');
+}
+
+function toggleIssue(gridId, issId) {
+  const chip=document.getElementById(`chip-${gridId}-${issId}`);
+  chip.classList.toggle('selected');
+}
+
+function buildProblemString(prefix) {
+  const typeMap={ 'Half Service':'w3','Full Service':'w3','Specific':'w3' };
+  // wizard uses 'w3', bookservice modal uses 'bs'
+  const issGrid  = prefix==='bs' ? 'bs-issues-grid' : 'w3-issues-grid';
+  const otherTxt = prefix==='bs' ? 'bs-problem'     : 'w3-problem';
+  const type     = prefix==='bs' ? _bsType          : _wizType;
+
+  if(type==='Half Service')
+    return 'HALF SERVICE: Engine oil change, new oil filter, coolant top-up, brake fluid top-up, screen wash top-up';
+  if(type==='Full Service')
+    return 'FULL SERVICE: Oil change, oil filter, coolant, brake fluid, screen wash — plus brakes, suspension, steering, exhaust, lights & electrical, complete safety inspection';
+  if(type==='Specific') {
+    const selected=COMMON_ISSUES
+      .filter(iss=>document.getElementById(`chip-${issGrid}-${iss.id}`)?.classList.contains('selected'))
+      .map(iss=>iss.label.replace(/[🛑⚙️❄️🔋🔄💨⚡🏎️💡🛢️🌡️🔘]/gu,'').trim());
+    const other=document.getElementById(otherTxt)?.value.trim()||'';
+    const all=[...selected, other].filter(Boolean);
+    return all.length ? all.join('; ') : '';
+  }
+  return '';
+}
+
+async function openBookServiceModal(preCarId) {
+  _bsType=null;
+  // Reset service type cards
+  ['bst-half','bst-full','bst-specific'].forEach(id=>document.getElementById(id).classList.remove('selected'));
+  ['bst-half-detail','bst-full-detail','bst-specific-detail'].forEach(id=>document.getElementById(id).style.display='none');
+  document.getElementById('bs-free-badge').innerHTML='';
+  hideMechBox('bs');
+  buildIssuesGrid('bs-issues-grid');
+  if(document.getElementById('bs-problem')) document.getElementById('bs-problem').value='';
+
+  const sel=document.getElementById('bs-car');
+  sel.innerHTML=DASH.cars.length
+    ?DASH.cars.map(c=>`<option value="${c.Car_id}" ${c.Car_id===preCarId?'selected':''}>${c.Registration_number} — ${c.Brand} ${c.Model}</option>`).join('')
+    :'<option value="">— Register a car first —</option>';
+
+  openModal('modal-bookservice');
+
+  // Load eligibility for pre-selected car
+  if(preCarId||sel.value) await onBsCarChange();
+}
+
+async function onBsCarChange() {
+  const carId=document.getElementById('bs-car').value;
+  const el=document.getElementById('bs-free-badge');
+  if(!carId){el.innerHTML='';return;}
+  const data=await GET(`/cars/${carId}/service-eligibility`);
+  if(data) el.innerHTML=freeBadgeHtml(data.totalServices);
+}
+
+function bsSelectType(type) {
+  _bsType=type;
+  ['bst-half','bst-full','bst-specific'].forEach(id=>document.getElementById(id).classList.remove('selected'));
+  document.getElementById(`bst-${type==='Half Service'?'half':type==='Full Service'?'full':'specific'}`).classList.add('selected');
+  document.getElementById('bst-half-detail').style.display    = type==='Half Service'?'block':'none';
+  document.getElementById('bst-full-detail').style.display    = type==='Full Service'?'block':'none';
+  document.getElementById('bst-specific-detail').style.display= type==='Specific'    ?'block':'none';
+
+  if(type!=='Specific') {
+    previewMechanic('bs', type.toLowerCase());
+  } else {
+    hideMechBox('bs');
+    // Watch for issue selection to update mechanic preview
+    document.querySelectorAll('#bs-issues-grid .issue-chip').forEach(chip => {
+      chip.addEventListener('click', () => {
+        clearTimeout(_mechDebounce);
+        _mechDebounce=setTimeout(() => {
+          const prob=buildProblemString('bs');
+          if(prob) previewMechanic('bs', prob);
+        }, 300);
+      });
+    });
+  }
+}
+
+async function previewMechanic(prefix, problem) {
+  const res=await POST('/customer/auto-mechanic',{problem});
+  if(!res)return;
+  showMechBox(prefix,res);
+}
+function showMechBox(prefix,mech) {
+  document.getElementById(`${prefix}-mech-name`).textContent=mech.MName;
+  document.getElementById(`${prefix}-mech-spec`).textContent=mech.Specialization||'General';
+  document.getElementById(`${prefix}-mech-badge`).textContent=
+    mech.matched?`Matched for "${mech.matched_spec}"`:'Best available mechanic';
+  document.getElementById(`${prefix}-mech-box`).classList.add('visible');
+}
+function hideMechBox(prefix) {
+  const b=document.getElementById(`${prefix}-mech-box`);
+  if(b) b.classList.remove('visible');
+}
+
+async function submitBookService() {
+  const carId=document.getElementById('bs-car').value;
+  if(!carId){toast('Please select a car.','error');return;}
+  if(!_bsType){toast('Please select a service package.','error');return;}
+  const problem=buildProblemString('bs');
+  if(!problem){toast('Please describe the issue for Specific service.','error');return;}
+
+  const btn=document.getElementById('bs-submit');
+  btn.disabled=true; btn.textContent='Booking…';
+
+  const mech=await POST('/customer/auto-mechanic',{problem});
+  if(!mech){btn.disabled=false;btn.textContent='Confirm Booking →';return;}
+
+  const date=new Date().toISOString().split('T')[0];
+  const res=await POST('/services',{date,problem,status:'Pending',carId,mId:mech.M_id,serviceType:_bsType});
+  btn.disabled=false; btn.textContent='Confirm Booking →';
+  if(!res)return;
+
+  toast(`${_bsType} booked! Assigned to ${mech.MName} 🔧`);
+  closeModal('modal-bookservice');
+  loadDashboard();
+}
+
+// ══════════════════════════════════════════
+//  PAYMENT — auto-calculated, no manual entry
+// ══════════════════════════════════════════
+async function openPayModal(serviceId, carName, regNo, problem) {
+  _payTarget={ serviceId, carName, regNo, problem, calcData:null };
+
+  document.getElementById('pay-modal-service-info').innerHTML=`
+    <div style="font-weight:700;font-size:14px;margin-bottom:4px">${carName}</div>
+    <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--muted);margin-bottom:8px">${regNo} · SR#${serviceId}</div>
+    <div style="font-size:13px;color:var(--text)">${problem}</div>`;
+
+  document.getElementById('pay-calc-area').innerHTML='<div class="spinner"></div>';
+  document.getElementById('pay-mode-row').style.display='none';
+  const btn=document.getElementById('pay-confirm-btn');
+  btn.disabled=true; btn.textContent='Loading…';
+
+  openModal('modal-pay');
+
+  // Fetch auto-calculation
+  const calc=await GET(`/services/${serviceId}/calculate-amount`);
+  if(!calc){ closeModal('modal-pay'); return; }
+
+  _payTarget.calcData=calc;
+
+  // Build breakdown UI
+  let html='';
+  if(calc.isFree) {
+    html=`<div class="bill-free-banner">
+      <div class="bill-free-icon">🎁</div>
+      <div>
+        <div class="bill-free-title">This is a FREE Service!</div>
+        <div class="bill-free-sub">This vehicle has used ${calc.priorServices} of ${calc.freeLimit} complimentary services.
+          ${calc.priorServices+1<calc.freeLimit?`${calc.freeLimit-(calc.priorServices+1)} free service(s) will remain.`:
+          'All free services will be used after this. Future services will be charged.'}</div>
+      </div>
+    </div>
+    <div class="bill-breakdown">
+      <div class="bill-breakdown-title">Service Summary</div>
+      ${calc.parts.length?calc.parts.map(p=>`
+        <div class="bill-line">
+          <span class="bl-name">${p.PName} × ${p.Quantity}</span>
+          <span class="bl-amount" style="text-decoration:line-through;color:var(--muted)">₹${Number(p.line_total).toLocaleString()}</span>
+        </div>`).join(''):'<div style="font-size:12px;color:var(--muted)">No parts recorded yet.</div>'}
+      <div class="bill-divider"></div>
+      <div class="bill-total-row">
+        <div class="bill-total-label">Total Due</div>
+        <div class="bill-total-amount" style="color:var(--success)">FREE</div>
+      </div>
+    </div>`;
+  } else {
+    html=`<div class="bill-breakdown">
+      <div class="bill-breakdown-title">Bill Breakdown</div>
+      ${calc.parts.length
+        ?calc.parts.map(p=>`
+          <div class="bill-line">
+            <span class="bl-name">${p.PName} × ${p.Quantity}</span>
+            <span class="bl-amount">₹${Number(p.line_total).toLocaleString()}</span>
+          </div>`).join('')
+        :'<div style="font-size:12px;color:var(--muted);margin-bottom:8px">No spare parts recorded yet.</div>'}
+      <div class="bill-line" style="margin-top:6px">
+        <span class="bl-name" style="color:var(--muted)">Parts Sub-total</span>
+        <span class="bl-amount" style="color:var(--muted)">₹${calc.partsTotal.toLocaleString()}</span>
+      </div>
+      <div class="bill-line">
+        <span class="bl-name">Mechanic Labor (${calc.serviceType})</span>
+        <span class="bl-amount">₹${calc.laborCharge.toLocaleString()}</span>
+      </div>
+      <div class="bill-divider"></div>
+      <div class="bill-total-row">
+        <div class="bill-total-label">Total Due</div>
+        <div class="bill-total-amount">₹${calc.total.toLocaleString('en-IN')}</div>
+      </div>
+    </div>`;
+  }
+  document.getElementById('pay-calc-area').innerHTML=html;
+  document.getElementById('pay-mode-row').style.display='block';
+
+  btn.disabled=false;
+  if(calc.isFree) {
+    btn.textContent='Confirm — No Charge ✓';
+    btn.className='btn btn-success btn-lg';
+  } else {
+    btn.textContent=`Pay ₹${calc.total.toLocaleString('en-IN')} ✓`;
+    btn.className='btn btn-success btn-lg';
+  }
+}
+
+async function submitPayment() {
+  if(!_payTarget?.calcData){ toast('Calculation not ready.','error'); return; }
+  const mode=document.getElementById('pay-mode').value;
+  const calc=_payTarget.calcData;
+
+  const date=new Date().toISOString().split('T')[0];
+  const res=await POST('/bills',{
+    date, mode,
+    serviceId: _payTarget.serviceId,
+    amount: calc.total
+  });
+  if(!res)return;
+
+  const label=calc.isFree?'Free service recorded! 🎁':`Payment of ₹${calc.total.toLocaleString('en-IN')} recorded via ${mode}! ✅`;
+  toast(label);
+  closeModal('modal-pay');
+  loadDashboard();
+}
+
+// ══════════════════════════════════════════
+//  RECEIPT MODAL
+// ══════════════════════════════════════════
+async function openReceiptModal(billId) {
+  const bill=DASH.bills.find(b=>b.Bill_id===billId);
+  if(!bill)return;
+  const parts=await GET(`/services/${bill.Service_id}/parts`)||[];
+  const partsHtml=parts.length
+    ?`<table style="width:100%;font-size:12.5px;margin-bottom:14px;border-collapse:collapse">
+        <thead><tr style="border-bottom:1px solid var(--border)">
+          <th style="text-align:left;padding:6px 10px;color:var(--muted);font-size:11px">Part</th>
+          <th style="text-align:right;padding:6px 10px;color:var(--muted);font-size:11px">Qty</th>
+          <th style="text-align:right;padding:6px 10px;color:var(--muted);font-size:11px">Amount</th>
+        </tr></thead>
+        <tbody>${parts.map(p=>`
+          <tr><td style="padding:7px 10px">${p.PName}</td>
+          <td style="padding:7px 10px;text-align:right;font-family:'JetBrains Mono',monospace">×${p.Quantity}</td>
+          <td style="padding:7px 10px;text-align:right;font-family:'JetBrains Mono',monospace">₹${(p.Price*p.Quantity).toLocaleString()}</td></tr>
+        `).join('')}</tbody>
+      </table>`
+    :`<div style="font-size:12.5px;color:var(--muted);margin-bottom:14px">No spare parts recorded.</div>`;
+
+  const isFree=Number(bill.Total_Amount)===0;
+  document.getElementById('receipt-content').innerHTML=`
+    <div class="receipt-header">
+      <div class="receipt-logo">AUTO<span>SERV</span> PRO</div>
+      <div class="receipt-sub">Service Receipt / Tax Invoice</div>
+    </div>
+    <div class="receipt-meta">
+      <div class="receipt-meta-item">
+        <div class="lbl">Customer</div>
+        <div style="font-weight:700">${CUSTOMER.C_name}</div>
+        <div style="color:var(--muted);font-size:12px">${CUSTOMER.Phone}</div>
+      </div>
+      <div class="receipt-meta-item" style="text-align:right">
+        <div class="lbl">Invoice</div>
+        <div style="font-family:'JetBrains Mono',monospace;font-weight:700">BILL #${bill.Bill_id}</div>
+        <div style="color:var(--muted);font-size:12px">${bill.Bill_date?.substring(0,10)||''}</div>
+      </div>
+    </div>
+    <div class="receipt-vehicle">
+      <div><strong>Vehicle:</strong> ${bill.Brand} ${bill.Model} (${bill.Registration_number})</div>
+      <div><strong>Service Type:</strong> ${bill.Service_Type||'—'}</div>
+      <div><strong>Problem:</strong> ${bill.Problem}</div>
+      ${bill.MName?`<div><strong>Mechanic:</strong> ${bill.MName}</div>`:''}
+    </div>
+    ${isFree?`<div class="bill-free-banner" style="margin-bottom:14px">
+      <div class="bill-free-icon">🎁</div>
+      <div><div class="bill-free-title">Complimentary Free Service</div>
+      <div class="bill-free-sub">Covered under your free service limit.</div></div>
+    </div>`:partsHtml}
+    <div class="receipt-total">
+      <div>
+        <div class="receipt-total-label">Total ${isFree?'(Complimentary)':'Amount'}</div>
+        <div style="font-size:12px;color:var(--muted);margin-top:2px">Paid via ${bill.Payment_Mode}</div>
+      </div>
+      <div class="receipt-total-amount">${isFree?'FREE':'₹'+Number(bill.Total_Amount).toLocaleString('en-IN')}</div>
+    </div>
+    <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:22px">
+      <button class="btn btn-ghost" onclick="closeModal('modal-receipt')">Close</button>
+      <button class="btn btn-primary" onclick="window.print()">🖨 Print</button>
+    </div>`;
+  openModal('modal-receipt');
+}
+
+// ══════════════════════════════════════════
+//  LOGOUT
+// ══════════════════════════════════════════
+function logout() {
+  CUSTOMER=null; DASH={cars:[],services:[],bills:[]};
+  document.getElementById('l-name').value='';
+  document.getElementById('l-phone').value='';
+  document.getElementById('login-error').style.display='none';
+  showScreen('login');
+  toast('Logged out successfully.');
+}
+</script>
+</body>
+</html>
